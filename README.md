@@ -1,17 +1,41 @@
-# mamacare
+# MamaCare
 
-A new Flutter project.
+MamaCare is a healthcare management application designed to support maternal wellness and improve communication between patients, doctors, administrators, and caretakers.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- Patient registration and profile management
+- Doctor registration and admin verification
+- Appointment management
+- Medical record tracking
+- Pregnancy and health monitoring
+- Caretaker/Family member access
+- Secure authentication
+- User-friendly mobile interface
 
-A few resources to get you started if this is your first Flutter project:
+## Tech Stack
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+### Frontend
+- Flutter
+- Dart
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Backend & Database
+- Firebase Authentication
+- Cloud Firestore
+
+### State Management
+- Provider
+
+### Local Storage
+- Shared Preferences
+
+### Notifications
+- Flutter Local Notifications
+
+## Project Structure
+
+- Admin Module
+- Doctor Module
+- Patient Module
+- Caretaker Module
+
