@@ -1,0 +1,141 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isDoctor() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/doctors/$(request.auth.uid));
+    }
+
+    function isApprovedDoctor() {
+      return isDoctor() &&
+        get(/databases/$(database)/documents/doctors/$(request.auth.uid)).data.approvalStatus == 'approved';
+    }
+
+    function isCaretakerOf(patientId) {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/caretakers/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/caretakers/$(request.auth.uid)).data.linkedPatientId == patientId;
+    }
+
+    // ── Admins collection ────────────────────────────────────────────
+    match /admins/{adminId} {
+      allow read: if isAdmin() || request.auth.uid == adminId;
+      allow write: if isAdmin();
+    }
+
+    // ── Caretakers collection ────────────────────────────────────────
+    match /caretakers/{caretakerId} {
+      allow read: if isSignedIn() && (request.auth.uid == caretakerId || isAdmin());
+      allow create: if isSignedIn() && request.auth.uid == caretakerId;
+      allow update: if isSignedIn() && request.auth.uid == caretakerId;
+      allow delete: if isAdmin();
+    }
+
+    // ── Doctors collection ───────────────────────────────────────────
+    match /doctors/{doctorId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == doctorId;
+      allow update: if (isSignedIn() && request.auth.uid == doctorId &&
+                        !('approvalStatus' in request.resource.data.diff(resource.data).affectedKeys()))
+                     || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── Users (patients) collection ──────────────────────────────────
+    match /users/{userId} {
+      allow read: if isSignedIn() && (
+        request.auth.uid == userId ||
+        isAdmin() ||
+        isApprovedDoctor() ||
+        isCaretakerOf(userId)
+      );
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if (isSignedIn() && request.auth.uid == userId &&
+                        !('approvalStatus' in request.resource.data.diff(resource.data).affectedKeys()))
+                     || isAdmin();
+      allow delete: if isAdmin();
+
+      match /medications/{docId} {
+        allow read, write: if isSignedIn() && request.auth.uid == userId;
+        allow read: if isAdmin() || isApprovedDoctor() || isCaretakerOf(userId);
+      }
+
+      match /moods/{docId} {
+        allow read, write: if isSignedIn() && request.auth.uid == userId;
+        allow read: if isAdmin() || isApprovedDoctor();
+      }
+
+      match /tests/{docId} {
+        allow read, write: if isSignedIn() && request.auth.uid == userId;
+        allow read: if isAdmin() || isApprovedDoctor() || isCaretakerOf(userId);
+      }
+    }
+
+    // ── Doctor requests ──────────────────────────────────────────────
+    match /doctor_requests/{requestId} {
+      allow read: if isSignedIn() && (
+        resource.data.patientId == request.auth.uid ||
+        resource.data.doctorId == request.auth.uid ||
+        isAdmin());
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && (
+        resource.data.patientId == request.auth.uid ||
+        resource.data.doctorId == request.auth.uid ||
+        isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // ── Appointments ─────────────────────────────────────────────────
+    match /appointments/{apptId} {
+      allow read: if isSignedIn() && (
+        resource.data.patientId == request.auth.uid ||
+        resource.data.doctorId == request.auth.uid ||
+        isAdmin());
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && (
+        resource.data.patientId == request.auth.uid ||
+        resource.data.doctorId == request.auth.uid ||
+        isAdmin());
+      allow delete: if isAdmin() ||
+        (isSignedIn() && resource.data.doctorId == request.auth.uid);
+    }
+
+    // ── Reports ──────────────────────────────────────────────────────
+    match /reports/{reportId} {
+      allow read: if isSignedIn() && (
+        resource.data.patientId == request.auth.uid ||
+        resource.data.doctorId == request.auth.uid ||
+        isAdmin() ||
+        isCaretakerOf(resource.data.patientId));
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && (
+        resource.data.doctorId == request.auth.uid || isAdmin());
+      allow delete: if isAdmin() ||
+        (isSignedIn() && resource.data.doctorId == request.auth.uid);
+    }
+
+    // ── Doctor-prescribed medications ─────────────────────────────────
+    match /doctor_medications/{docId} {
+      allow read: if isSignedIn() && (
+        resource.data.patientId == request.auth.uid ||
+        resource.data.doctorId == request.auth.uid ||
+        isAdmin() ||
+        isCaretakerOf(resource.data.patientId));
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && (
+        resource.data.doctorId == request.auth.uid || isAdmin());
+      allow delete: if isAdmin() ||
+        (isSignedIn() && resource.data.doctorId == request.auth.uid);
+    }
+  }
+}

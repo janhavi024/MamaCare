@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "557273261296",
+    "project_id": "mamacare-3936d",
+    "storage_bucket": "mamacare-3936d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:557273261296:android:f540ff14e42a8ecd00ce35",
+        "android_client_info": {
+          "package_name": "com.project.mamacare"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDurZ149MHXUynRlN6_NkyoE4prhgtX7EA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
