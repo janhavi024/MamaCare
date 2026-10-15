@@ -1,0 +1,19 @@
+# TEST-ONLY configuration (in-memory H2). The secret below is not used anywhere else.
+spring:
+  datasource:
+    url: jdbc:h2:mem:mamacare;MODE=MySQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+app:
+  jwt:
+    secret: test-only-secret-test-only-secret-1234567890
+    expiration-minutes: 60
+  storage:
+    dir: ./target/test-uploads
+  bootstrap:
+    admin-email: admin@test.local
+    admin-password: TestAdmin123
