@@ -1,0 +1,5 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- DEBUG ONLY: lets the emulator talk to the local HTTP backend at 10.0.2.2. Release builds must use HTTPS. -->
+    <application android:usesCleartextTraffic="true"/>
+</manifest>
